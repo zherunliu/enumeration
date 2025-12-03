@@ -1,4 +1,4 @@
-Function.prototype.myCall = function (thisArg, args) {
+Function.prototype.myApply = function (thisArg, args) {
   // 设置 this
   const f = Symbol();
   thisArg[f] = this;
@@ -13,4 +13,4 @@ function add(...args) {
 }
 
 rico = { dislike: "JavaScript" };
-console.log(add.myCall(rico, [1, 3]));
+console.log(add.myApply(rico, [1, 3]));
