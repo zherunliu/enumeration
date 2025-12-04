@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1 id="app">Hello, world</h1>
+    <script type="module">
+      import { myReactive } from "./myReactive.js";
+      import { myEffect } from "./myEffect.js";
+      const user = myReactive({
+        name: "rico",
+        age: 24,
+      });
+
+      myEffect(() => {
+        document.querySelector("#app").innerText = `${user.name}--${user.age}`;
+      });
+
+      setTimeout(() => {
+        user.age = 19;
+      }, 2000);
+    </script>
+  </body>
+</html>
