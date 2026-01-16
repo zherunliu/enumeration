@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebSocket</title>
+  </head>
+  <body>
+    <div>
+      <ul id="list"></ul>
+      <input type="text" id="input" />
+      <button id="btn">Send</button>
+    </div>
+  </body>
+</html>
+
+<script>
+  const ws = new WebSocket("ws://localhost:8080");
+
+  const input = document.querySelector("#input");
+  const btn = document.querySelector("#btn");
+  const list = document.querySelector("#list");
+  btn.addEventListener("click", () => {
+    if (input.value) {
+      ws.send(input.value);
+      input.value = "";
+    }
+  });
+
+  ws.onopen = () => {
+    console.log("WebSocket connection established");
+  };
+
+  ws.onmessage = (event) => {
+    console.log("Message from server:", event.data);
+    let data = JSON.parse(event.data);
+    if (data.type === 2) {
+      let li = document.createElement("li");
+      li.innerText = event.data;
+      list.appendChild(li);
+    }
+  };
+
+  ws.onerror = (error) => {
+    console.error("WebSocket error:", error);
+  };
+
+  /* 调用 ws.close() 可以主动断开 */
+  ws.onclose = () => {
+    console.log("WebSocket connection closed");
+  };
+</script>

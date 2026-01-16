@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SSE</title>
+  </head>
+  <body>
+    <div id="sse"></div>
+    <script>
+      document.addEventListener("keydown", (e) => {
+        if (e.keyCode === 13) {
+          const eventSource = new EventSource("/sse");
+
+          /* 也可以使用 eventSource.addEventListener('message')
+            可自定义 默认 message */
+          eventSource.onmessage = (event) => {
+            const data = event.data;
+            document.getElementById("sse").innerHTML += `<p>${data}</p>`;
+          };
+          eventSource.onerror = (err) => {
+            console.error(err);
+            eventSource.close();
+          };
+        }
+      });
+    </script>
+  </body>
+</html>
