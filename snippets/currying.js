@@ -22,3 +22,21 @@ const typeOfTest = (type) => (thing) => typeof thing === type;
 const isString = typeOfTest("string");
 console.log(isString("hello")); // true
 console.log(isString(123)); // false
+
+function curry(fn) {
+  // 获取函数的参数个数
+  const arity = fn.length;
+  return function curried(...args) {
+    if (args.length >= arity) {
+      return fn.apply(this, args);
+    } else {
+      return function (...restArgs) {
+        return curried.apply(this, args.concat(restArgs));
+      };
+    }
+  };
+}
+
+const curriedSum = curry((a, b, c) => a + b + c);
+
+console.log(curriedSum(1, 2)(3)); // 6
