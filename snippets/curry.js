@@ -1,6 +1,7 @@
 /* 函数柯里化（Currying）是一种函数式编程技巧，核心思想是将接收多个参数的函数，
 转化为一系列只接收单一参数（或部分参数）的函数链，最终通过多次调用累加参数并执行原函数逻辑 */
 
+// example usages
 function sumMaker(length) {
   let nums = [];
   return function sum(...args) {
@@ -23,6 +24,7 @@ const isString = typeOfTest("string");
 console.log(isString("hello")); // true
 console.log(isString(123)); // false
 
+// curry
 function curry(fn) {
   // 获取函数的参数个数
   const arity = fn.length;
@@ -40,3 +42,14 @@ function curry(fn) {
 const curriedSum = curry((a, b, c) => a + b + c);
 
 console.log(curriedSum(1, 2)(3)); // 6
+
+//unCurry
+function unCurry(fn) {
+  return function (context, ...args) {
+    return fn.call(context, ...args);
+  };
+}
+
+const obj = {};
+unCurry([].push)(obj, 1, 2, 3);
+console.log(obj);
