@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>5501</title>
+  </head>
+  <body>
+    <h1>hello</h1>
+    <script>
+      window.addEventListener("message", (e) => {
+        if (e.origin !== "http://127.0.0.1:5500") {
+          return;
+        }
+        console.log("[5501] 收到主页面消息：", e.data);
+        console.log("[5501] 正在回复消息...");
+        e.source.postMessage(
+          { type: "reply", content: "你好，主页面！" },
+          e.origin,
+        );
+        console.log("[5501] 回复消息已发送");
+      });
+    </script>
+  </body>
+</html>

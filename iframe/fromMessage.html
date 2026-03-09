@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>5500</title>
+  </head>
+  <body>
+    <script>
+      const iframe = document.createElement("iframe");
+      iframe.src = "http://127.0.0.1:5501/toMessage.html";
+      document.body.appendChild(iframe);
+
+      function sendMessage() {
+        console.log("[5500] 正在发送消息到 iframe...");
+        const targetWindow = iframe.contentWindow;
+        targetWindow.postMessage(
+          { type: "greet", content: "你好，iframe！" },
+          "http://127.0.0.1:5501",
+        );
+        console.log("[5500] 消息已发送");
+      }
+
+      iframe.onload = () => {
+        console.log("[5500] iframe 加载完成");
+        sendMessage();
+      };
+
+      window.addEventListener("message", (e) => {
+        if (e.origin !== "http://127.0.0.1:5501") {
+          return;
+        }
+        console.log("[5500] 收到 iframe 的回复消息：", e.data);
+      });
+    </script>
+  </body>
+</html>
