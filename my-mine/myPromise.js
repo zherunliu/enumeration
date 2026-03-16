@@ -45,45 +45,28 @@ class MyPromise {
           };
     // 支持链式调用 创建 Promise 的回调函数是立即执行的
     const promise = new MyPromise((resolve, reject) => {
+      const onFuncHandler = (onFunc) => {
+        runAsyncTask(() => {
+          try {
+            let x = onFunc(this.result);
+            resolvePromise(promise, x, resolve, reject);
+          } catch (err) {
+            reject(err);
+          }
+        });
+      };
+
       if (this.state === FULFILLED) {
-        runAsyncTask(() => {
-          try {
-            const x = onFulfilled(this.result);
-            resolvePromise(promise, x, resolve, reject);
-          } catch (error) {
-            reject(error);
-          }
-        });
+        onFuncHandler(onFulfilled);
       } else if (this.state === REJECTED) {
-        runAsyncTask(() => {
-          try {
-            const x = onRejected(this.result);
-            resolvePromise(promise, x, resolve, reject);
-          } catch (error) {
-            reject(error);
-          }
-        });
+        onFuncHandler(onRejected);
       } else if (this.state === PENDING) {
         this.#handlers.push({
           onFulfilled: () => {
-            runAsyncTask(() => {
-              try {
-                const x = onFulfilled(this.result);
-                resolvePromise(p2, x, resolve, reject);
-              } catch (error) {
-                reject(error);
-              }
-            });
+            onFuncHandler(onFulfilled);
           },
           onRejected: () => {
-            runAsyncTask(() => {
-              try {
-                const x = onRejected(this.result);
-                resolvePromise(p2, x, resolve, reject);
-              } catch (error) {
-                reject(error);
-              }
-            });
+            onFuncHandler(onRejected);
           },
         });
       }
@@ -97,10 +80,17 @@ class MyPromise {
   }
 
   finally(onFinally) {
-    return this.then(onFinally, onFinally);
+    return this.then(
+      (value) => MyPromise.resolve(onFinally()).then(() => value),
+      (reason) =>
+        MyPromise.resolve(onFinally()).then(() => {
+          throw reason;
+        }),
+    );
   }
 
-  // 静态方法
+  // #region 静态方法
+
   // 如果传入的是 Promise 将会直接返回，否则返回兑现的 Promise
   static resolve(value) {
     if (value instanceof MyPromise) {
@@ -130,7 +120,7 @@ class MyPromise {
           },
           (err) => {
             reject(err);
-          }
+          },
         );
       });
     });
@@ -155,7 +145,7 @@ class MyPromise {
           },
           (err) => {
             reject(err);
-          }
+          },
         );
       });
     });
@@ -182,7 +172,7 @@ class MyPromise {
             results[index] = { status: REJECTED, reason: err };
             count++;
             count === promises.length && resolve(results);
-          }
+          },
         );
       });
     });
@@ -209,11 +199,12 @@ class MyPromise {
             count++;
             count === promises.length &&
               reject(new AggregateError(errors, "All promises were rejected"));
-          }
+          },
         );
       });
     });
   }
+  // #endregion
 }
 
 // 开启异步任务
@@ -237,11 +228,63 @@ function resolvePromise(promise, x, resolve, reject) {
   }
   // 处理返回 Promise 的逻辑
   if (x instanceof MyPromise) {
-    x.then(
-      (res) => resolve(res),
-      (err) => reject(err)
-    );
+    x.then((y) => {
+      resolvePromise(promise, y, resolve, reject);
+    }, reject);
+  } else if (x !== null && (typeof x === "object" || typeof x === "function")) {
+    let then;
+    try {
+      then = x.then;
+    } catch (err) {
+      return reject(err);
+    }
+    if (typeof then === "function") {
+      let called = false;
+      try {
+        then.call(
+          x,
+          (y) => {
+            if (called) return;
+            called = true;
+            resolvePromise(promise, y, resolve, reject);
+          },
+          (r) => {
+            if (called) return;
+            called = true;
+            reject(r);
+          },
+        );
+      } catch (err) {
+        if (called) return;
+        called = true;
+        reject(err);
+      }
+    } else {
+      resolve(x);
+    }
   } else {
-    resolve(x);
+    return resolve(x);
   }
 }
+
+// for promises-aplus-tests
+MyPromise.deferred = function () {
+  let result = {};
+  result.promise = new MyPromise((resolve, reject) => {
+    result.resolve = resolve;
+    result.reject = reject;
+  });
+  return result;
+};
+
+module.exports = {
+  resolved: (value) => {
+    return MyPromise.resolve(value);
+  },
+  rejected: (reason) => {
+    return MyPromise.reject(reason);
+  },
+  deferred: () => {
+    return MyPromise.deferred();
+  },
+};

@@ -9,12 +9,14 @@
   "scripts": {
     "dev": "vite sse",
     "live1": "live-server --port=5500 --open=fromMessage.html iframe",
-    "live2": "live-server --port=5501 --open=toMessage.html iframe"
+    "live2": "live-server --port=5501 --open=toMessage.html iframe",
+    "test": "promises-aplus-tests my-mine/myPromise.js"
   },
   "packageManager": "pnpm@10.23.0+sha512.21c4e5698002ade97e4efe8b8b4a89a8de3c85a37919f957e7a0f30f38fbc5bbdd05980ffe29179b2fb6e6e691242e098d945d1601772cad0fef5fb6411e2a4b",
   "devDependencies": {
     "@types/node": "^24.10.1",
     "live-server": "^1.2.2",
+    "promises-aplus-tests": "^2.1.2",
     "vite": "^7.3.1"
   }
 }
