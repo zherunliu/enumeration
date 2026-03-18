@@ -33,6 +33,7 @@ function curry(fn) {
       return fn.apply(this, args);
     } else {
       return function (...restArgs) {
+        // 使用传递参数的方式，全局数组是单例的多次调用会污染
         return curried.apply(this, args.concat(restArgs));
       };
     }
@@ -42,6 +43,7 @@ function curry(fn) {
 const curriedSum = curry((a, b, c) => a + b + c);
 
 console.log(curriedSum(1, 2)(3)); // 6
+console.log(curriedSum(4, 5)(6)); // 15
 
 //unCurry
 function unCurry(fn) {
@@ -52,4 +54,8 @@ function unCurry(fn) {
 
 const obj = {};
 unCurry([].push)(obj, 1, 2, 3);
-console.log(obj);
+console.log(obj); // { '0': 1, '1': 2, '2': 3, length: 3 }
+
+const unCurried = unCurry(curriedSum);
+console.log(unCurried(null, 1, 2, 3)); // 6
+console.log(unCurried(null, 1)(2)(3)); // 6
